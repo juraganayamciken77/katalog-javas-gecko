@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java's GeckonCatalog - Modern</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff; line-height: 1.6; }
+        .header { background: linear-gradient(90deg, #000 0%, #1a1a1a 100%); padding: 1rem 2rem; box-shadow: 0 4px 15px rgba(255,215,0,0.2); position: sticky; top: 0; z-index: 1000; }
+        .header-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .logo { font-size: 1.8rem; font-weight: bold; color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+        .header-right { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+        .user-info { background: #1a1a1a; padding: 0.6rem 1rem; border-radius: 8px; border: 2px solid #ffd700; color: #ffd700; font-weight: bold; font-size: 0.9rem; }
+        .nav-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .btn-header { padding: 0.6rem 1.2rem; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s ease; font-size: 0.9rem; }
+        .btn-upload { background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: #000; }
+        .btn-upload:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,215,0,0.4); }
+        .btn-panel { background: linear-gradient(135deg, #3a3a3a 0%, #4a4a4a 100%); color: #ffd700; border: 2px solid #ffd700; }
+        .btn-panel:hover { background: #ffd700; color: #000; transform: translateY(-2px); }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        .products-section { margin-top: 2rem; }
+        .section-title { font-size: 2rem; margin-bottom: 2rem; color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.3); }
+        .products-grid { display: grid; gap: 2rem; margin-bottom: 3rem; }
+        @media (min-width: 480px) { .products-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 768px) { .products-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 1024px) { .products-grid { grid-template-columns: repeat(4, 1fr); } }
+        @media (min-width: 1280px) { .products-grid { grid-template-columns: repeat(5, 1fr); } }
+        @media (min-width: 1536px) { .products-grid { grid-template-columns: repeat(6, 1fr); } }
+        .product-card { background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%); border-radius: 12px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.5); transition: all 0.3s ease; cursor: pointer; border: 2px solid transparent; }
+        .product-card:hover { transform: translateY(-8px); box-shadow: 0 12px 35px rgba(255,215,0,0.3); border-color: #ffd700; }
+        .product-image { width: 100%; height: 200px; object-fit: cover; position: relative; }
+        .product-badge { position: absolute; top: 10px; right: 10px; background: #ff4444; color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 0.8rem; }
+        .product-info { padding: 1.5rem; }
+        .product-name { font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem; color: #ffd700; }
+        .product-price { font-size: 1.5rem; font-weight: bold; color: #fff; margin-bottom: 0.5rem; }
+        .product-seller { font-size: 0.9rem; color: #aaa; margin-bottom: 0.5rem; }
+        .product-location { font-size: 0.85rem; color: #888; margin-bottom: 1rem; }
+        .btn-buy { width: 100%; padding: 0.8rem; background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; font-size: 0.95rem; }
+        .btn-buy:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(255,215,0,0.4); }
+        .btn-buy:disabled { background: #888; cursor: not-allowed; transform: none; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%); padding: 2rem; border-radius: 12px; box-shadow: 0 10px 40px rgba(255,215,0,0.2); border: 2px solid #ffd700; max-width: 600px; width: 95%; max-height: 85vh; overflow-y: auto; }
+        @media (min-width: 768px) { .modal-content { max-width: 700px; } }
+        @media (min-width: 1024px) { .modal-content { max-width: 800px; } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #ffd700; }
+        .modal-title { font-size: 1.8rem; color: #ffd700; }
+        .close-btn { background: none; border: none; color: #ffd700; font-size: 2rem; cursor: pointer; transition: all 0.3s ease; }
+        .close-btn:hover { transform: rotate(90deg); color: #fff; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: #ffd700; font-weight: bold; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 0.8rem; background: #1a1a1a; border: 2px solid #3a3a3a; color: #fff; border-radius: 6px; font-family: inherit; transition: all 0.3s ease; }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #ffd700; box-shadow: 0 0 10px rgba(255,215,0,0.3); }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        .btn-primary { width: 100%; padding: 1rem; background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); color: #000; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,215,0,0.4); }
+        .auth-tabs { display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 2px solid #ffd700; padding-bottom: 1rem; }
+        .auth-tab-btn { padding: 0.8rem 1.5rem; background: #1a1a1a; color: #aaa; border: none; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; font-weight: bold; }
+        .auth-tab-btn.active { background: #ffd700; color: #000; box-shadow: 0 4px 15px rgba(255,215,0,0.3); }
+        .auth-tab-content { display: none; }
+        .auth-tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .otp-timer { text-align: center; color: #ffd700; font-weight: bold; margin: 1rem 0; font-size: 1.2rem; }
+        .otp-timer.warning { color: #ff4444; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .panel-container { background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%); border-radius: 12px; padding: 2rem; border: 2px solid #ffd700; }
+        .panel-tabs { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; border-bottom: 2px solid #ffd700; padding-bottom: 1rem; }
+        .tab-btn { padding: 0.8rem 1.5rem; background: #1a1a1a; color: #aaa; border: none; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; font-weight: bold; }
+        .tab-btn.active { background: #ffd700; color: #000; box-shadow: 0 4px 15px rgba(255,215,0,0.3); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        .products-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .products-table th { background: #1a1a1a; color: #ffd700; padding: 1rem; text-align: left; font-weight: bold; border-bottom: 2px solid #ffd700; }
+        .products-table td { padding: 1rem; border-bottom: 1px solid #3a3a3a; color: #ccc; }
+        .products-table tr:hover { background: #3a3a3a; }
+        .table-image { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; }
+        .status-badge { padding: 0.4rem 0.8rem; border-radius: 4px; font-weight: bold; font-size: 0.85rem; }
+        .status-tersedia { background: #44dd44; color: #000; }
+        .status-habis { background: #ff4444; color: #fff; }
+        .action-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .btn-action { padding: 0.4rem 0.8rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; transition: all 0.3s ease; font-weight: bold; }
+        .btn-hapus { background: #ff4444; color: white; }
+        .btn-hapus:hover { background: #dd0000; transform: scale(1.1); }
+        .btn-habis { background: #ffaa00; color: white; }
+        .btn-habis:hover { background: #ff8800; transform: scale(1.1); }
+        .btn-edit { background: #00aaff; color: white; }
+        .btn-edit:hover { background: #0088dd; transform: scale(1.1); }
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
+        .admin-table th { background: #1a1a1a; color: #ffd700; padding: 1rem; text-align: left; font-weight: bold; border-bottom: 2px solid #ffd700; }
+        .admin-table td { padding: 1rem; border-bottom: 1px solid #3a3a3a; color: #ccc; }
+        .admin-table tr:hover { background: #3a3a3a; }
+        .password-display { display: flex; align-items: center; gap: 0.5rem; background: #1a1a1a; padding: 0.5rem; border-radius: 4px; font-family: monospace; }
+        .password-text { letter-spacing: 2px; }
+        .btn-toggle-pass { background: none; border: none; color: #ffd700; cursor: pointer; font-size: 1rem; transition: all 0.3s ease; }
+        .btn-toggle-pass:hover { transform: scale(1.2); color: #ffed4e; }
+        .btn-copy { background: #ffd700; color: #000; border: none; padding: 0.3rem 0.6rem; border-radius: 3px; cursor: pointer; font-size: 0.75rem; transition: all 0.3s ease; font-weight: bold; }
+        .btn-copy:hover { background: #ffed4e; transform: scale(1.1); }
+        .btn-copy.copied { background: #44dd44; }
+        .notification { position: fixed; top: 20px; right: 20px; padding: 1.5rem 2rem; background: #2d2d2d; color: #fff; border-radius: 8px; box-shadow: 0 8px 25px rgba(0,0,0,0.5); border-left: 5px solid #ffd700; animation: slideIn 0.3s ease; z-index: 3000; }
+        .notification.error { border-left-color: #ff4444; background: #3a1a1a; }
+        .notification.success { border-left-color: #44dd44; background: #1a3a1a; }
+        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @media (max-width: 480px) {
+            .header-container { flex-direction: column; gap: 0.5rem; }
+            .logo { font-size: 1.3rem; }
+            .header-right { width: 100%; flex-direction: column; }
+            .nav-buttons { width: 100%; justify-content: space-between; }
+            .user-info { width: 100%; text-align: center; }
+            .btn-header { padding: 0.5rem 0.8rem; font-size: 0.8rem; }
+            .container { padding: 1rem; }
+            .section-title { font-size: 1.5rem; }
+            .products-table { font-size: 0.85rem; }
+            .products-table th, .products-table td { padding: 0.8rem 0.5rem; }
+            .table-image { width: 40px; height: 40px; }
+            .action-buttons { flex-direction: column; }
+            .btn-action { width: 100%; }
+            .modal-content { max-width: 95%; padding: 1.5rem; }
+            .admin-table { font-size: 0.75rem; }
+            .admin-table th, .admin-table td { padding: 0.6rem 0.3rem; }
+            .auth-tabs { flex-direction: column; }
+            .auth-tab-btn { width: 100%; }
+        }
+        .empty-state { text-align: center; padding: 3rem 2rem; color: #888; }
+        .empty-state-icon { font-size: 4rem; margin-bottom: 1rem; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: #ffd700; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ffed4e; }
+        .loading { display: inline-block; width: 20px; height: 20px; border: 3px solid #ffd700; border-radius: 50%; border-top-color: transparent; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-container">
+        <div class="logo">Java's Gecko</div>
+        <div class="header-right">
+            <div class="user-info" id="userInfo">Belum Login</div>
+            <div class="nav-buttons">
+                <button class="btn-header btn-upload" onclick="checkLoginBeforeUpload()">Unggah Produk</button>
+                <button class="btn-header btn-panel" onclick="openAuthModal()">Login/Daftar</button>
+                <button class="btn-header btn-panel" onclick="openSellerPanel()">Panel Penjual</button>
+                <button class="btn-header btn-panel" onclick="openAdminPanel()">Admin</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <h1 class="section-title">Selamat Datang di Java's Gecko Grup Catalog</h1>
+    <div class="products-grid" id="productsGrid"></div>
+</div>
+
+<!-- MODAL AUTH -->
+<div class="modal" id="authModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Login / Daftar</h2>
+            <button class="close-btn" onclick="closeModal('authModal')">×</button>
+        </div>
+        <div class="auth-tabs">
+            <button class="auth-tab-btn active" id="authBtn-loginTab" onclick="switchAuthTab('loginTab', this)">Login</button>
+            <button class="auth-tab-btn" id="authBtn-registerTab" onclick="switchAuthTab('registerTab', this)">Daftar</button>
+            <button class="auth-tab-btn" id="authBtn-forgotTab" onclick="switchAuthTab('forgotTab', this)">Lupa Password</button>
+        </div>
+        <div id="loginTab" class="auth-tab-content active">
+            <div class="form-group">
+                <label>Nomor Telepon</label>
+                <input type="tel" id="loginPhone" placeholder="08123456789">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" placeholder="Masukkan password">
+            </div>
+            <button class="btn-primary" onclick="handleLogin()">Login</button>
+        </div>
+        <div id="registerTab" class="auth-tab-content">
+            <div id="registerStep1">
+                <div class="form-group">
+                    <label>Nama Lengkap</label>
+                    <input type="text" id="regName" placeholder="Masukkan nama">
+                </div>
+                <div class="form-group">
+                    <label>Nomor Telepon</label>
+                    <input type="tel" id="regPhone" placeholder="08123456789">
+                </div>
+                <div class="form-group">
+                    <label>Domisili</label>
+                    <input type="text" id="regLocation" placeholder="Kota, Provinsi">
+                </div>
+                <button class="btn-primary" onclick="sendOTPToWhatsApp()">Minta OTP ke WhatsApp Admin</button>
+            </div>
+            <div id="registerStep2" style="display: none;">
+                <div style="background: #1a3a1a; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid #44dd44;">
+                    <p style="color: #44dd44; margin-bottom: 0.5rem;">✅ Kode OTP telah dikirim ke WhatsApp Anda!</p>
+                    <p style="color: #aaa; font-size: 0.9rem;">Silakan hubungi admin untuk mendapatkan kode OTP</p>
+                </div>
+                <div class="form-group">
+                    <label>Masukkan Kode OTP (6 digit)</label>
+                    <input type="text" id="regOTP" placeholder="Contoh: 123456" maxlength="6">
+                    <div class="otp-timer" id="otpTimer"></div>
+                </div>
+                <div class="form-group">
+                    <label>Buat Password</label>
+                    <input type="password" id="regPassword" placeholder="Password minimal 6 karakter">
+                </div>
+                <button class="btn-primary" onclick="verifyOTPAndRegister()">✅ Verifikasi & Daftar</button>
+                <button class="btn-primary" onclick="backToRegisterStep1()" style="background: #ff8800; margin-top: 0.5rem;">← Kembali</button>
+            </div>
+        </div>
+        <div id="forgotTab" class="auth-tab-content">
+            <div id="forgotStep1">
+                <div class="form-group">
+                    <label>Nomor Telepon</label>
+                    <input type="tel" id="forgotPhone" placeholder="08123456789">
+                </div>
+                <button class="btn-primary" onclick="sendForgotOTP()">Minta OTP ke WhatsApp ADMIN</button>
+            </div>
+            <div id="forgotStep2" style="display: none;">
+                <div style="background: #1a3a1a; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid #44dd44;">
+                    <p style="color: #44dd44;">✅ Kode OTP telah dikirim ke WhatsApp Anda!</p>
+                </div>
+                <div class="form-group">
+                    <label>Masukkan Kode OTP</label>
+                    <input type="text" id="forgotOTP" placeholder="Contoh: 123456" maxlength="6">
+                    <div class="otp-timer" id="forgotOtpTimer"></div>
+                </div>
+                <div class="form-group">
+                    <label>Password Baru</label>
+                    <input type="password" id="forgotNewPassword" placeholder="Password minimal 6 karakter">
+                </div>
+                <button class="btn-primary" onclick="verifyForgotOTPAndReset()">✅ Verifikasi & Reset</button>
+                <button class="btn-primary" onclick="backToForgotStep1()" style="background: #ff8800; margin-top: 0.5rem;">← Kembali</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL UPLOAD -->
+<div class="modal" id="uploadModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Unggah Produk Baru</h2>
+            <button class="close-btn" onclick="closeModal('uploadModal')">×</button>
+        </div>
+        <div class="form-group">
+            <label>Foto Produk</label>
+            <input type="file" id="productImage" accept="image/*">
+        </div>
+        <div class="form-group">
+            <label>Nama Produk</label>
+            <input type="text" id="productName" placeholder="Contoh: Leopard Gecko">
+        </div>
+        <div class="form-group">
+            <label>Deskripsi Produk</label>
+            <textarea id="productDescription" placeholder="Jelaskan detail produk..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>Harga Produk (Rp)</label>
+            <input type="number" id="productPrice" placeholder="Contoh: 250000">
+        </div>
+        <div class="form-group">
+            <label>Domisili Produk</label>
+            <input type="text" id="productLocation" placeholder="Domisili penjual">
+        </div>
+        <button class="btn-primary" onclick="handleUploadProduct()">Unggah Produk</button>
+    </div>
+</div>
+
+<!-- MODAL DETAIL -->
+<div class="modal" id="detailModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title" id="detailTitle">Detail Produk</h2>
+            <button class="close-btn" onclick="closeModal('detailModal')">×</button>
+        </div>
+        <div id="detailContent"></div>
+    </div>
+</div>
+
+<!-- MODAL SELLER PANEL -->
+<div class="modal" id="sellerPanelModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Panel Penjual</h2>
+            <button class="close-btn" onclick="closeModal('sellerPanelModal')">×</button>
+        </div>
+        <div class="panel-container">
+            <div class="panel-tabs">
+                <button class="tab-btn active">📦 Produk Saya</button>
+            </div>
+            <div id="sellerProductsList"></div>
+        </div>
+        <button class="btn-primary" onclick="logoutSeller()" style="margin-top: 1rem; background: #ff4444;">🔐 Logout</button>
+    </div>
+</div>
+
+<!-- MODAL EDIT -->
+<div class="modal" id="editModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Edit Produk</h2>
+            <button class="close-btn" onclick="closeModal('editModal')">×</button>
+        </div>
+        <div class="form-group">
+            <label>Foto Produk (kosongkan jika tidak diubah)</label>
+            <input type="file" id="editProductImage" accept="image/*">
+        </div>
+        <div class="form-group">
+            <label>Nama Produk</label>
+            <input type="text" id="editProductName">
+        </div>
+        <div class="form-group">
+            <label>Deskripsi Produk</label>
+            <textarea id="editProductDescription"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Harga Produk (Rp)</label>
+            <input type="number" id="editProductPrice">
+        </div>
+        <div class="form-group">
+            <label>Domisili Penjual</label>
+            <input type="text" id="editProductLocation">
+        </div>
+        <button class="btn-primary" onclick="handleEditProduct()">Simpan Perubahan</button>
+    </div>
+</div>
+
+<!-- MODAL ADMIN -->
+<div class="modal" id="adminPanelModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">🔑 Panel Admin</h2>
+            <button class="close-btn" onclick="closeModal('adminPanelModal')">×</button>
+        </div>
+        <div id="adminLoginForm">
+            <div class="form-group">
+                <label>🔑 Masukkan Password Admin</label>
+                <input type="password" id="adminPassword" placeholder="Password admin">
+            </div>
+            <button class="btn-primary" onclick="loginAdmin()">🔓 Login Admin</button>
+        </div>
+        <div id="adminPanelContent" style="display: none;">
+            <div class="panel-container">
+                <div class="panel-tabs">
+                    <button class="tab-btn active" id="adminBtn-ubahPassword" onclick="switchAdminTab('ubahPassword', this)">🔐 Ubah Password</button>
+                    <button class="tab-btn" id="adminBtn-kelolaNomorAdmin" onclick="switchAdminTab('kelolaNomorAdmin', this)">📞 Kelola Nomor</button>
+                    <button class="tab-btn" id="adminBtn-kelolOTP" onclick="switchAdminTab('kelolOTP', this)">🔐 Kelola OTP</button>
+                    <button class="tab-btn" id="adminBtn-lihatSemua" onclick="switchAdminTab('lihatSemua', this)">👁️ Lihat Semua</button>
+                </div>
+                <div id="ubahPassword" class="tab-content active">
+                    <h3 style="color: #ffd700; margin-bottom: 1rem;">🔐 Ubah Password Admin</h3>
+                    <div class="form-group">
+                        <label>Password Admin Lama</label>
+                        <input type="password" id="oldAdminPassword" placeholder="Password lama">
+                    </div>
+                    <div class="form-group">
+                        <label>Password Admin Baru</label>
+                        <input type="password" id="newAdminPassword" placeholder="Password baru">
+                    </div>
+                    <button class="btn-primary" onclick="changeAdminPassword()">✅ Ubah Password</button>
+                </div>
+                <div id="kelolaNomorAdmin" class="tab-content">
+                    <h3 style="color: #ffd700; margin-bottom: 1rem;">📞 Kelola Nomor WhatsApp Admin</h3>
+                    <div style="background: #1a1a1a; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 5px solid #ffd700;">
+                        <p style="color: #aaa; margin-bottom: 0.5rem;">Nomor Saat Ini:</p>
+                        <p style="color: #ffd700; font-size: 1.1rem; font-weight: bold;" id="currentAdminPhone">-</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Nomor WhatsApp Admin Baru</label>
+                        <input type="tel" id="newAdminPhone" placeholder="Contoh: 62812345678">
+                        <small style="color: #888;">*Format: 62XXXXXXXXXXX</small>
+                    </div>
+                    <button class="btn-primary" onclick="updateAdminPhone()">✅ Simpan Nomor</button>
+                </div>
+                <div id="kelolOTP" class="tab-content">
+                    <h3 style="color: #ffd700; margin-bottom: 1rem;">🔐 Kelola Kode OTP</h3>
+                    <div style="background: #1a1a1a; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 5px solid #ffd700;">
+                        <p style="color: #aaa; margin-bottom: 0.5rem;">Kode OTP Saat Ini:</p>
+                        <div class="password-display">
+                            <span class="password-text" id="otpDisplay">••••••</span>
+                            <button class="btn-toggle-pass" onclick="toggleOTPDisplay()">👁️</button>
+                            <button class="btn-copy" onclick="copyOTP()">📋 Copy</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Kode OTP Baru (6 digit angka)</label>
+                        <input type="text" id="newOTP" placeholder="Contoh: 123456" maxlength="6">
+                    </div>
+                    <button class="btn-primary" onclick="updateOTP()">✅ Simpan Kode OTP</button>
+                </div>
+                <div id="lihatSemua" class="tab-content">
+                    <h3 style="color: #ffd700; margin-bottom: 1rem;">👁️ Data Pengguna & Produk</h3>
+                    <div id="adminDataList"></div>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="logoutAdmin()" style="margin-top: 1rem; background: #ff4444;">🔐 Logout Admin</button>
+        </div>
+    </div>
+</div>
+
+<!-- Firebase v8 — versi paling stabil untuk sintaks firebase.initializeApp() -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+    // ===== FIREBASE CONFIG =====
+    const firebaseConfig = {
+        apiKey: "AIzaSyD1rx4by3fEE9EDoZSqEB2ARE9GMAnfCUI",
+        authDomain: "catalog-javas-gecko-database.firebaseapp.com",
+        databaseURL: "https://catalog-javas-gecko-database-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "catalog-javas-gecko-database",
+        storageBucket: "catalog-javas-gecko-database.firebasestorage.app",
+        messagingSenderId: "939403571945",
+        appId: "1:939403571945:web:f783145c771d9da85ef678"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let currentUser = null;
+    let otpTimerInterval = null;
+    let currentEditingProduct = null;
+
+    // ===== INIT =====
+    function initializeApp() {
+        loadCurrentUser();
+        initializeAdminData();
+        setupProductListener();
+    }
+
+    function initializeAdminData() {
+        db.ref('admin/config').once('value', snapshot => {
+            if (!snapshot.exists()) {
+                db.ref('admin/config').set({
+                    adminPhone: '62812345678',
+                    adminPassword: 'adminsangatsopanbaikhati',
+                    otpCode: '123456'
+                });
+            }
+        });
+    }
+
+    function loadCurrentUser() {
+        const userData = localStorage.getItem('currentUser');
+        if (userData) {
+            currentUser = JSON.parse(userData);
+            updateUserInfo();
+        }
+    }
+
+    function updateUserInfo() {
+        const userInfo = document.getElementById('userInfo');
+        userInfo.innerHTML = currentUser ? `${currentUser.nama}` : `🔓 Belum Login`;
+    }
+
+    function openAuthModal() {
+        if (currentUser) { showNotification('✅ Anda sudah login!', 'success'); return; }
+        document.getElementById('authModal').classList.add('active');
+    }
+
+    // ✅ PERBAIKAN #2: switchAuthTab sekarang menerima elemen tombol sebagai parameter
+    function switchAuthTab(tab, btnEl) {
+        document.querySelectorAll('.auth-tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.auth-tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tab).classList.add('active');
+        if (btnEl) btnEl.classList.add('active');
+    }
+
+    // ✅ PERBAIKAN #2 (sama): switchAdminTab menerima elemen tombol sebagai parameter
+    function switchAdminTab(tab, btnEl) {
+        document.querySelectorAll('#adminPanelContent .tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('#adminPanelContent .tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tab).classList.add('active');
+        if (btnEl) btnEl.classList.add('active');
+        if (tab === 'lihatSemua') displayAdminData();
+    }
+
+    // ===== LOGIN =====
+    function handleLogin() {
+        const phone = document.getElementById('loginPhone').value.trim();
+        const password = document.getElementById('loginPassword').value;
+
+        if (!phone || !password) { showNotification('❌ Nomor telepon dan password harus diisi!', 'error'); return; }
+
+        db.ref('users').orderByChild('telepon').equalTo(phone).once('value', snapshot => {
+            if (!snapshot.exists()) { showNotification('❌ Nomor telepon tidak terdaftar!', 'error'); return; }
+
+            let userFound = false;
+            snapshot.forEach(child => {
+                if (child.val().password === password) {
+                    currentUser = { uid: child.key, nama: child.val().nama, telepon: child.val().telepon, domisili: child.val().domisili };
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    updateUserInfo();
+                    showNotification('✅ Login berhasil!', 'success');
+                    closeModal('authModal');
+                    userFound = true;
+                }
+            });
+            if (!userFound) showNotification('❌ Password salah!', 'error');
+        });
+    }
+
+    // ===== REGISTER =====
+    function sendOTPToWhatsApp() {
+        const name = document.getElementById('regName').value.trim();
+        const phone = document.getElementById('regPhone').value.trim();
+        const location = document.getElementById('regLocation').value.trim();
+
+        if (!name || !phone || !location) { showNotification('❌ Semua field harus diisi!', 'error'); return; }
+
+        db.ref('users').orderByChild('telepon').equalTo(phone).once('value', snapshot => {
+            if (snapshot.exists()) { showNotification('❌ Nomor telepon sudah terdaftar!', 'error'); return; }
+
+            db.ref('admin/config/adminPhone').once('value', snap => {
+                const adminPhone = snap.val() || '62812345678';
+                const message = `Halo kakak admin saya ingin daftarkan akun ${name} dengan nomor telepon ${phone} mohon kode otp nya min`;
+                window.open(`https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`, '_blank');
+
+                document.getElementById('registerStep1').style.display = 'none';
+                document.getElementById('registerStep2').style.display = 'block';
+                window.tempRegData = { name, phone, location };
+                startOTPTimer('otpTimer');
+            });
+        });
+    }
+
+    function startOTPTimer(elementId) {
+        clearInterval(otpTimerInterval);
+        let timeLeft = 600;
+        const timerEl = document.getElementById(elementId);
+        otpTimerInterval = setInterval(() => {
+            timeLeft--;
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerEl.classList.toggle('warning', timeLeft <= 60);
+            timerEl.textContent = `⏱️ OTP berlaku: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            if (timeLeft <= 0) {
+                clearInterval(otpTimerInterval);
+                timerEl.textContent = '❌ OTP kadaluarsa!';
+            }
+        }, 1000);
+    }
+
+    function verifyOTPAndRegister() {
+        const otp = document.getElementById('regOTP').value;
+        const password = document.getElementById('regPassword').value;
+
+        if (!otp || !password) { showNotification('❌ OTP dan password harus diisi!', 'error'); return; }
+        if (password.length < 6) { showNotification('❌ Password minimal 6 karakter!', 'error'); return; }
+
+        db.ref('admin/config/otpCode').once('value', snapshot => {
+            const correctOTP = snapshot.val() || '123456';
+            if (otp !== correctOTP) { showNotification('❌ Kode OTP salah!', 'error'); return; }
+
+            const { name, phone, location } = window.tempRegData;
+            const newUserRef = db.ref('users').push();
+            newUserRef.set({ nama: name, telepon: phone, domisili: location, password: password, createdAt: new Date().toISOString() }).then(() => {
+                currentUser = { uid: newUserRef.key, nama: name, telepon: phone, domisili: location };
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                updateUserInfo();
+                showNotification('✅ Akun berhasil dibuat!', 'success');
+                clearInterval(otpTimerInterval);
+                closeModal('authModal');
+                // ✅ PERBAIKAN #3: reset form yang benar
+                document.getElementById('regName').value = '';
+                document.getElementById('regPhone').value = '';
+                document.getElementById('regLocation').value = '';
+                document.getElementById('regOTP').value = '';
+                document.getElementById('regPassword').value = '';
+                document.getElementById('registerStep1').style.display = 'block';
+                document.getElementById('registerStep2').style.display = 'none';
+            });
+        });
+    }
+
+    function backToRegisterStep1() {
+        clearInterval(otpTimerInterval);
+        document.getElementById('registerStep1').style.display = 'block';
+        document.getElementById('registerStep2').style.display = 'none';
+    }
+
+    // ===== FORGOT PASSWORD =====
+    function sendForgotOTP() {
+        const phone = document.getElementById('forgotPhone').value.trim();
+        if (!phone) { showNotification('❌ Nomor telepon harus diisi!', 'error'); return; }
+
+        db.ref('users').orderByChild('telepon').equalTo(phone).once('value', snapshot => {
+            if (!snapshot.exists()) { showNotification('❌ Nomor telepon tidak terdaftar!', 'error'); return; }
+
+            db.ref('admin/config/adminPhone').once('value', snap => {
+                const adminPhone = snap.val() || '62812345678';
+                const message = `Halo kakak admin saya lupa password, nomor telepon saya ${phone}, mohon kode otp untuk reset password min`;
+                window.open(`https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`, '_blank');
+
+                document.getElementById('forgotStep1').style.display = 'none';
+                document.getElementById('forgotStep2').style.display = 'block';
+                window.tempForgotPhone = phone;
+                startOTPTimer('forgotOtpTimer');
+            });
+        });
+    }
+
+    function verifyForgotOTPAndReset() {
+        const otp = document.getElementById('forgotOTP').value;
+        const newPassword = document.getElementById('forgotNewPassword').value;
+
+        if (!otp || !newPassword) { showNotification('❌ OTP dan password baru harus diisi!', 'error'); return; }
+        if (newPassword.length < 6) { showNotification('❌ Password minimal 6 karakter!', 'error'); return; }
+
+        db.ref('admin/config/otpCode').once('value', snapshot => {
+            const correctOTP = snapshot.val() || '123456';
+            if (otp !== correctOTP) { showNotification('❌ Kode OTP salah!', 'error'); return; }
+
+            db.ref('users').orderByChild('telepon').equalTo(window.tempForgotPhone).once('value', snapshot => {
+                snapshot.forEach(child => {
+                    db.ref(`users/${child.key}/password`).set(newPassword).then(() => {
+                        showNotification('✅ Password berhasil direset!', 'success');
+                        clearInterval(otpTimerInterval);
+                        closeModal('authModal');
+                        backToForgotStep1();
+                    });
+                });
+            });
+        });
+    }
+
+    function backToForgotStep1() {
+        clearInterval(otpTimerInterval);
+        document.getElementById('forgotStep1').style.display = 'block';
+        document.getElementById('forgotStep2').style.display = 'none';
+    }
+
+    // ===== UPLOAD PRODUK =====
+    function checkLoginBeforeUpload() {
+        if (!currentUser) { showNotification('❌ Anda harus login terlebih dahulu!', 'error'); openAuthModal(); return; }
+        document.getElementById('uploadModal').classList.add('active');
+    }
+
+    // ✅ PERBAIKAN #4: tidak lagi menggunakan onsubmit form — langsung dipanggil dari onclick
+    function handleUploadProduct() {
+        const fileInput = document.getElementById('productImage');
+        const name = document.getElementById('productName').value.trim();
+        const desc = document.getElementById('productDescription').value.trim();
+        const price = document.getElementById('productPrice').value;
+        const location = document.getElementById('productLocation').value.trim();
+
+        if (!fileInput.files[0] || !name || !desc || !price || !location) {
+            showNotification('❌ Semua field harus diisi!', 'error'); return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const product = {
+                nama: name,
+                deskripsi: desc,
+                harga: parseInt(price),
+                domisili: location,
+                telepon: currentUser.telepon,
+                image: e.target.result,
+                status: 'tersedia',
+                userId: currentUser.uid,
+                createdAt: new Date().toISOString()
+            };
+            db.ref('products').push().set(product).then(() => {
+                showNotification('✅ Produk berhasil diunggah!', 'success');
+                document.getElementById('productImage').value = '';
+                document.getElementById('productName').value = '';
+                document.getElementById('productDescription').value = '';
+                document.getElementById('productPrice').value = '';
+                document.getElementById('productLocation').value = '';
+                closeModal('uploadModal');
+            }).catch(err => showNotification('❌ Gagal upload: ' + err.message, 'error'));
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+    }
+
+    // ===== PRODUK =====
+    function setupProductListener() {
+        db.ref('products').on('value', snapshot => {
+            const grid = document.getElementById('productsGrid');
+            const products = [];
+            snapshot.forEach(child => products.push({ id: child.key, ...child.val() }));
+
+            if (products.length === 0) {
+                grid.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div>Belum ada produk</div>';
+                return;
+            }
+
+            grid.innerHTML = products.map(p => `
+                <div class="product-card" onclick="openDetailModal('${p.id}')">
+                    <div style="position: relative;">
+                        <img src="${p.image}" alt="${p.nama}" class="product-image">
+                        ${p.status === 'habis' ? '<div class="product-badge">HABIS</div>' : ''}
+                    </div>
+                    <div class="product-info">
+                        <div class="product-name">${p.nama}</div>
+                        <div class="product-price">Rp ${p.harga.toLocaleString('id-ID')}</div>
+                        <div class="product-seller">📞 ${p.telepon}</div>
+                        <div class="product-location">📍 ${p.domisili}</div>
+                        <button class="btn-buy" ${p.status === 'habis' ? 'disabled' : ''} onclick="event.stopPropagation(); buyProduct('${p.telepon}', '${p.nama}', ${p.harga})">
+                            ${p.status === 'habis' ? '⛔ Habis' : '💬 Belanja Sekarang'}
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        });
+    }
+
+    function openDetailModal(productId) {
+        db.ref(`products/${productId}`).once('value', snapshot => {
+            const p = snapshot.val();
+            if (!p) return;
+            document.getElementById('detailTitle').textContent = p.nama;
+            document.getElementById('detailContent').innerHTML = `
+                <img src="${p.image}" alt="${p.nama}" style="width:100%;height:300px;object-fit:cover;border-radius:8px;margin-bottom:1.5rem;">
+                <div style="margin-bottom:1.5rem;">
+                    <h3 style="color:#ffd700;margin-bottom:0.5rem;">Deskripsi</h3>
+                    <p style="color:#ccc;">${p.deskripsi}</p>
+                </div>
+                <div style="background:#1a1a1a;padding:1rem;border-radius:8px;margin-bottom:1.5rem;">
+                    <div style="margin-bottom:0.8rem;"><span style="color:#888;">Harga: </span><span style="color:#ffd700;font-size:1.5rem;font-weight:bold;">Rp ${p.harga.toLocaleString('id-ID')}</span></div>
+                    <div style="margin-bottom:0.8rem;"><span style="color:#888;">Penjual: </span><span style="color:#fff;">${p.telepon}</span></div>
+                    <div style="margin-bottom:0.8rem;"><span style="color:#888;">Domisili: </span><span style="color:#fff;">${p.domisili}</span></div>
+                    <div><span style="color:#888;">Status: </span><span style="color:${p.status === 'habis' ? '#ff4444' : '#44dd44'};">${p.status === 'habis' ? '⛔ HABIS' : '✅ TERSEDIA'}</span></div>
+                </div>
+                <button class="btn-buy" onclick="buyProduct('${p.telepon}','${p.nama}',${p.harga})" ${p.status === 'habis' ? 'disabled' : ''} style="width:100%;">
+                    ${p.status === 'habis' ? '⛔ Produk Habis' : '💬 Belanja Sekarang'}
+                </button>
+            `;
+            document.getElementById('detailModal').classList.add('active');
+        });
+    }
+
+    function buyProduct(phone, productName, price) {
+        const message = `Halo kak! Saya tertarik pada produk ini 🛍️\n\n*Nama Produk:* ${productName}\n\n💰 Harga: Rp ${price.toLocaleString('id-ID')}\n\nBisa kita bicara lebih lanjut? 😊\n\n*note utamakan menggunakan jasa rekber terkenal atau COD pertengahan`;
+        window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
+        closeModal('detailModal');
+    }
+
+    // ===== SELLER PANEL =====
+    function openSellerPanel() {
+        if (!currentUser) { showNotification('❌ Anda harus login terlebih dahulu!', 'error'); openAuthModal(); return; }
+        displaySellerProducts();
+        document.getElementById('sellerPanelModal').classList.add('active');
+    }
+
+    function displaySellerProducts() {
+        db.ref('products').orderByChild('userId').equalTo(currentUser.uid).once('value', snapshot => {
+            const products = [];
+            snapshot.forEach(child => products.push({ id: child.key, ...child.val() }));
+
+            if (products.length === 0) {
+                document.getElementById('sellerProductsList').innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div>Belum ada produk</div>';
+                return;
+            }
+
+            document.getElementById('sellerProductsList').innerHTML = `
+                <table class="products-table">
+                    <thead><tr><th>Foto</th><th>Nama</th><th>Harga</th><th>Status</th><th>Aksi</th></tr></thead>
+                    <tbody>
+                        ${products.map(p => `
+                            <tr>
+                                <td><img src="${p.image}" class="table-image"></td>
+                                <td>${p.nama}</td>
+                                <td>Rp ${p.harga.toLocaleString('id-ID')}</td>
+                                <td><span class="status-badge status-${p.status}">${p.status === 'habis' ? '⛔ HABIS' : '✅ TERSEDIA'}</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-action btn-edit" onclick="openEditProduct('${p.id}')">✏️ Edit</button>
+                                        <button class="btn-action btn-habis" onclick="toggleProductStatus('${p.id}','${p.status}')">${p.status === 'habis' ? '✅ Tersedia' : '⚠️ Habis'}</button>
+                                        <button class="btn-action btn-hapus" onclick="deleteProduct('${p.id}')">🗑️ Hapus</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        });
+    }
+
+    function openEditProduct(productId) {
+        db.ref(`products/${productId}`).once('value', snapshot => {
+            const p = snapshot.val();
+            currentEditingProduct = { id: productId, ...p };
+            document.getElementById('editProductName').value = p.nama;
+            document.getElementById('editProductDescription').value = p.deskripsi;
+            document.getElementById('editProductPrice').value = p.harga;
+            document.getElementById('editProductLocation').value = p.domisili;
+            document.getElementById('editModal').classList.add('active');
+        });
+    }
+
+    // ✅ PERBAIKAN #4 (sama): tidak lagi pakai onsubmit form
+    function handleEditProduct() {
+        const fileInput = document.getElementById('editProductImage');
+        const updateData = {
+            nama: document.getElementById('editProductName').value,
+            deskripsi: document.getElementById('editProductDescription').value,
+            harga: parseInt(document.getElementById('editProductPrice').value),
+            domisili: document.getElementById('editProductLocation').value
+        };
+
+        const doUpdate = (data) => {
+            db.ref(`products/${currentEditingProduct.id}`).update(data).then(() => {
+                showNotification('✅ Produk berhasil diperbarui!', 'success');
+                closeModal('editModal');
+                displaySellerProducts();
+            });
+        };
+
+        if (fileInput.files.length > 0) {
+            const reader = new FileReader();
+            reader.onload = e => { updateData.image = e.target.result; doUpdate(updateData); };
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            doUpdate(updateData);
+        }
+    }
+
+    function toggleProductStatus(productId, currentStatus) {
+        const newStatus = currentStatus === 'habis' ? 'tersedia' : 'habis';
+        db.ref(`products/${productId}/status`).set(newStatus).then(() => {
+            showNotification(newStatus === 'habis' ? '⚠️ Produk ditandai habis' : '✅ Produk ditandai tersedia', 'success');
+            displaySellerProducts();
+        });
+    }
+
+    function deleteProduct(productId) {
+        if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
+            db.ref(`products/${productId}`).remove().then(() => {
+                showNotification('✅ Produk berhasil dihapus!', 'success');
+                displaySellerProducts();
+            });
+        }
+    }
+
+    function logoutSeller() {
+        currentUser = null;
+        localStorage.removeItem('currentUser');
+        updateUserInfo();
+        closeModal('sellerPanelModal');
+        showNotification('✅ Logout berhasil!', 'success');
+    }
+
+    // ===== ADMIN =====
+    function openAdminPanel() {
+        document.getElementById('adminLoginForm').style.display = 'block';
+        document.getElementById('adminPanelContent').style.display = 'none';
+        document.getElementById('adminPassword').value = '';
+        document.getElementById('adminPanelModal').classList.add('active');
+    }
+
+    function loginAdmin() {
+        const password = document.getElementById('adminPassword').value;
+        db.ref('admin/config/adminPassword').once('value', snapshot => {
+            const correctPassword = snapshot.val() || 'adminsangatsopanbaikhati';
+            if (password !== correctPassword) { showNotification('❌ Password admin salah!', 'error'); return; }
+            document.getElementById('adminLoginForm').style.display = 'none';
+            document.getElementById('adminPanelContent').style.display = 'block';
+            loadAdminData();
+        });
+    }
+
+    function loadAdminData() {
+        db.ref('admin/config').once('value', snapshot => {
+            const config = snapshot.val();
+            document.getElementById('currentAdminPhone').textContent = config.adminPhone || '-';
+            document.getElementById('otpDisplay').textContent = '••••••';
+        });
+    }
+
+    function changeAdminPassword() {
+        const oldPassword = document.getElementById('oldAdminPassword').value;
+        const newPassword = document.getElementById('newAdminPassword').value;
+        if (!oldPassword || !newPassword) { showNotification('❌ Password tidak boleh kosong!', 'error'); return; }
+
+        db.ref('admin/config/adminPassword').once('value', snapshot => {
+            if (oldPassword !== snapshot.val()) { showNotification('❌ Password lama salah!', 'error'); return; }
+            db.ref('admin/config/adminPassword').set(newPassword).then(() => {
+                showNotification('✅ Password admin berhasil diubah!', 'success');
+                document.getElementById('oldAdminPassword').value = '';
+                document.getElementById('newAdminPassword').value = '';
+            });
+        });
+    }
+
+    function updateAdminPhone() {
+        const newPhone = document.getElementById('newAdminPhone').value.trim();
+        if (!newPhone) { showNotification('❌ Nomor telepon tidak boleh kosong!', 'error'); return; }
+        if (!newPhone.startsWith('62')) { showNotification('❌ Gunakan format internasional (62XXXXXXXXXXX)!', 'error'); return; }
+        db.ref('admin/config/adminPhone').set(newPhone).then(() => {
+            showNotification('✅ Nomor WhatsApp admin berhasil diubah!', 'success');
+            document.getElementById('currentAdminPhone').textContent = newPhone;
+            document.getElementById('newAdminPhone').value = '';
+        });
+    }
+
+    function updateOTP() {
+        const newOTP = document.getElementById('newOTP').value.trim();
+        if (!newOTP || newOTP.length !== 6) { showNotification('❌ OTP harus 6 digit!', 'error'); return; }
+        if (!/^\d+$/.test(newOTP)) { showNotification('❌ OTP hanya boleh berisi angka!', 'error'); return; }
+        db.ref('admin/config/otpCode').set(newOTP).then(() => {
+            showNotification('✅ Kode OTP berhasil diubah!', 'success');
+            document.getElementById('otpDisplay').textContent = '••••••';
+            document.getElementById('newOTP').value = '';
+        });
+    }
+
+    function toggleOTPDisplay() {
+        const display = document.getElementById('otpDisplay');
+        const isHidden = display.textContent === '••••••';
+        db.ref('admin/config/otpCode').once('value', snapshot => {
+            display.textContent = isHidden ? snapshot.val() : '••••••';
+        });
+    }
+
+    function copyOTP() {
+        db.ref('admin/config/otpCode').once('value', snapshot => {
+            navigator.clipboard.writeText(snapshot.val()).then(() => showNotification('✅ OTP berhasil dicopy!', 'success'));
+        });
+    }
+
+    function displayAdminData() {
+        db.ref('users').once('value', usersSnap => {
+            db.ref('products').once('value', prodSnap => {
+                const users = [], products = [];
+                usersSnap.forEach(c => users.push({ uid: c.key, ...c.val() }));
+                prodSnap.forEach(c => products.push({ id: c.key, ...c.val() }));
+
+                document.getElementById('adminDataList').innerHTML = `
+                    <h4 style="color:#ffd700;margin-bottom:1rem;">👥 Pengguna Terdaftar (${users.length})</h4>
+                    <table class="admin-table">
+                        <thead><tr><th>Nama</th><th>Nomor Telepon</th><th>Domisili</th></tr></thead>
+                        <tbody>${users.map(u => `<tr><td>${u.nama}</td><td>${u.telepon}</td><td>${u.domisili}</td></tr>`).join('')}</tbody>
+                    </table>
+                    <h4 style="color:#ffd700;margin:2rem 0 1rem;">🛍️ Produk Terdaftar (${products.length})</h4>
+                    <table class="admin-table">
+                        <thead><tr><th>Nama Produk</th><th>Harga</th><th>Status</th><th>Penjual</th></tr></thead>
+                        <tbody>${products.map(p => `<tr><td>${p.nama}</td><td>Rp ${p.harga.toLocaleString('id-ID')}</td><td><span class="status-badge status-${p.status}">${p.status === 'habis' ? '⛔ HABIS' : '✅ TERSEDIA'}</span></td><td>${p.telepon}</td></tr>`).join('')}</tbody>
+                    </table>
+                `;
+            });
+        });
+    }
+
+    function logoutAdmin() {
+        document.getElementById('adminLoginForm').style.display = 'block';
+        document.getElementById('adminPanelContent').style.display = 'none';
+        closeModal('adminPanelModal');
+        showNotification('✅ Logout admin berhasil!', 'success');
+    }
+
+    // ===== UTILITIES =====
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    function showNotification(message, type = 'success') {
+        const el = document.createElement('div');
+        el.className = `notification ${type}`;
+        el.textContent = message;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 3000);
+    }
+
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) this.classList.remove('active');
+        });
+    });
+
+    initializeApp();
+</script>
+</body>
+</html>
